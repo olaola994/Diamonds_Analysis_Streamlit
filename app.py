@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 original_df = sns.load_dataset("diamonds")
 df = original_df
@@ -129,9 +130,66 @@ st.pyplot(fig)
 st.markdown("""
 ### 📊 Conclusions:
 - The average price does not increase linearly - for example, VVS1 and VVS2 diamonds are not significantly cheaper than IF.
--  The greater the purity, the greater the price range: high-purity diamonds (IF, VVS1) have greater price differences depending on the cut. Diamonds of lower purity (SI1, SI2) have more even prices between the different cuts.
+- The greater the purity, the greater the price range: high-purity diamonds (IF, VVS1) have greater price differences depending on the cut. Diamonds of lower purity (SI1, SI2) have more even prices between the different cuts.
 """)
 
-st.header("How do different features affect the price at the same time?")
-fig = sns.pairplot(df, vars=["carat", "depth", "table", "price"], hue="cut", palette="coolwarm")
+st.header("What are the most common diamond carats?")
+fig, ax = plt.subplots(figsize=(14, 7))
+sns.histplot(data=original_df["carat"], bins=50, kde=True, ax=ax, color="blue")
+ax.set_xlabel("Carat")
+ax.set_ylabel("Count")
+ax.set_xticks(np.arange(0, original_df["carat"].max() + 0.2, 0.2))
 st.pyplot(fig)
+st.markdown("""
+### 📊 Conclusions:
+- The most common carats of diamonds are those in the range 0.3-0.4.
+""")
+
+# st.header("How do different features affect the price at the same time?")
+# fig = sns.pairplot(df, vars=["carat", "depth", "table", "price"], hue="cut", palette="coolwarm")
+# st.pyplot(fig)
+
+st.header("Are there extreme outliers in diamond sizes?")
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.boxplot(data=original_df, y="carat", ax=ax, color="red")
+ax.set_title("Carat Outliers")
+st.pyplot(fig)
+
+median_carat = original_df["carat"].median()
+mean_carat = original_df["carat"].mean()
+
+st.write(f"**Carat median**: {median_carat:.2f}")
+st.write(f"**Carat mean**: {mean_carat:.2f}")
+
+st.markdown("""
+### 📊 Conclusions:
+- Most of the diamonds in the base are less than 2 carats in weight, suggesting that larger diamonds are much rarer.
+- Diamonds over 2 carats are outliers.
+""")
+
+st.header("How do multiple dimensions influence diamond price?")
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
+sns.scatterplot(data=original_df, x='x', y='price', alpha=0.3, ax=axes[0])
+axes[0].set_title('Length (x) vs Price')
+axes[0].set_xlabel('x (Length)')
+axes[0].set_ylabel('Price ($)')
+
+sns.scatterplot(data=original_df, x='y', y='price', alpha=0.3, ax=axes[1])
+axes[1].set_title('Width (y) vs Price')
+axes[1].set_xlabel('y (Width)')
+axes[1].set_ylabel('Price ($)')
+
+sns.scatterplot(data=original_df, x='z', y='price', alpha=0.3, ax=axes[2])
+axes[2].set_title('Depth (z) vs Price')
+axes[2].set_xlabel('z (Depth)')
+axes[2].set_ylabel('Price ($)')
+
+plt.tight_layout()
+st.pyplot(fig)
+
+st.markdown("""
+### 📊 Conclusions:
+- Each dimension increases the price of a diamond as its value increases.
+""")
